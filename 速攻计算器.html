@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>速攻计算器</title>
+    <style>
+        * {
+            font-size: 20px;
+        }
+
+        h2 {
+            font-size: 26px;
+        }
+
+        .m {
+            display: inline-block;
+            min-width: 60px;
+        }
+
+        input {
+            outline: none;
+            font-size: 20px;
+            width: 100px;
+        }
+
+        #checkbox {
+            width: 20px;
+            height: 20px;
+            margin: 0;
+            padding: 0;
+            margin-left: 10px;
+            margin-right: 42px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>我方1速速攻值100时</h2>
+    <span>速度</span>
+    <input type="number" class="speed">
+    <span>乱速 : </span><span class="m">2.5%</span>
+    <input type="range" name="" id="playerM">
+
+    <br><br>
+    <h2>我方成员1</h2>
+    <span>速度</span>
+    <input type="number" class="speed">
+    <span>速攻值%</span>
+    <input type="number" class="p">
+    <span>乱速 : </span><span class="m">0%</span>
+    <h2>我方成员2</h2>
+    <span>速度</span>
+    <input type="number" class="speed">
+    <span>速攻值%</span>
+    <input type="number" class="p">
+    <span>乱速 : </span><span class="m">0%</span>
+    <h2>我方成员3</h2>
+    <span>速度</span>
+    <input type="number" class="speed">
+    <span>速攻值%</span>
+    <input type="number" class="p">
+    <span>乱速 : </span><span class="m">0%</span>
+
+    <br><br>
+    <h2>敌方角色</h2>
+    <span>是否出手</span><input type="checkbox" checked id="checkbox">
+    <span>速攻值%</span>
+    <input type="number" class="p">
+    <span>速度区间 : </span><span class="m">0-0</span>
+
+    <br><br><br><br>
+    <h2>使用说明</h2>
+    <div>输入我方速度与速攻值数据后，根据所有我方角色的乱速情况调整我方1速的乱速情况，即可计算得到敌方速度区间。
+        <br>非100%速攻值时的乱速区间一般在-1%到5%（游戏中速攻值为下取整，存在误差）
+    </div>
+</body>
+<script>
+    let playerM = document.querySelector('#playerM');
+    // 玩家速度
+    let playerSpeed = document.querySelectorAll('.speed');
+    // 玩家速攻值
+    let playerPs = document.querySelectorAll('.p');
+    // 玩家乱速
+    let playerMs = document.querySelectorAll('.m');
+    // 是否出手
+    let checkbox = document.querySelector('#checkbox');
+    function floor(num) {
+        if (!num) return 0
+        return Math.floor(num * 100) / 100
+    }
+
+    function getM(speedF, mF, speed, p) {
+        speedF = speedF * 1
+        mF = mF * 1
+        speed = speed * 1
+        p = p * 1
+        let useTime = (100 - mF) / speedF
+        let baseP = useTime * speed
+        return floor(p - baseP)
+    }
+    function getSpeed(speedF, mF) {
+        speedF = speedF * 1
+        mF = mF * 1
+        let useTime = (100 - mF) / speedF
+        let fit = checkbox.checked ? 100 : 0
+        let speed = []
+        speed[0] = floor((playerPs[3].value * 1 + fit - 6) / useTime)
+        speed[1] = floor((playerPs[3].value * 1 + fit) / useTime)
+        return speed
+    }
+    let timer1 = null
+    function changePlayerM() {
+        if (timer1) return false
+        timer1 = setTimeout(() => {
+            // console.log(playerM.value);
+            playerMs[0].innerHTML = floor(playerM.value / 100 * 5) + '%'
+            for (let i = 0; i < 3; i++) {
+                if (playerSpeed[i + 1].value && playerPs[i].value) {
+                    playerMs[i + 1].innerHTML = getM(playerSpeed[0].value, playerM.value / 100 * 5, playerSpeed[i + 1].value, playerPs[i].value) + '%'
+                }
+            }
+            if (playerPs[3].value) {
+                let speed = getSpeed(playerSpeed[0].value, playerM.value / 100 * 5)
+                playerMs[4].innerHTML = speed[0] + '-' + speed[1]
+            }
+            timer1 = null
+        }, 100);
+
+    }
+
+    document.querySelectorAll('input').forEach(e => {
+        e.addEventListener('input', changePlayerM)
+    });
+
+</script>
+
+</html>
